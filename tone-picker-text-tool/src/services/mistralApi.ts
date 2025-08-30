@@ -81,12 +81,15 @@ export class MistralApiService {
       });
       
       if (error.response) {
-        const errorMessage = error.response.data?.error || `API error: ${error.response.status}`;
-        throw new Error(errorMessage);
+        const errorData = error.response.data;
+        const errorMessage = typeof errorData === 'string' ? errorData : 
+                           errorData?.error || errorData?.message || 
+                           `API error: ${error.response.status}`;
+        throw new Error(String(errorMessage));
       } else if (error.request) {
         throw new Error('Network error: Unable to connect to server');
       } else {
-        throw new Error(error.message || 'An unexpected error occurred');
+        throw new Error(String(error.message) || 'An unexpected error occurred');
       }
     }
   }
