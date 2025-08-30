@@ -81,11 +81,8 @@ export class MistralApiService {
       });
       
       if (error.response) {
-        const apiError: ApiError = {
-          message: error.response.data?.error || `API error: ${error.response.status}`,
-          status: error.response.status
-        };
-        throw apiError;
+        const errorMessage = error.response.data?.error || `API error: ${error.response.status}`;
+        throw new Error(errorMessage);
       } else if (error.request) {
         throw new Error('Network error: Unable to connect to server');
       } else {

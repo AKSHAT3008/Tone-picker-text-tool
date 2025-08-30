@@ -35,7 +35,13 @@ export default async function handler(req, res) {
     const { text, tone } = req.body;
     
     if (!text?.trim()) {
+      console.log('Error: Text is required');
       return res.status(400).json({ error: 'Text is required' });
+    }
+    
+    if (!process.env.MISTRAL_API_KEY) {
+      console.log('Error: MISTRAL_API_KEY not found');
+      return res.status(500).json({ error: 'API key not configured' });
     }
 
     const cacheKey = `${text.substring(0, 100)}_${tone.x}_${tone.y}`;
@@ -44,6 +50,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ transformedText: cache.get(cacheKey) });
     }
 
+    console.log('Making request to Mistral API...');
     const response = await axios.post(
       'https://api.mistral.ai/v1/chat/completions',
       {
@@ -60,10 +67,12 @@ export default async function handler(req, res) {
         timeout: 30000
       }
     );
+    console.log('Mistral API response received');
 
     const transformedText = response.data.choices[0].message.content.trim();
     cache.set(cacheKey, transformedText);
     
+    console.log('Returning transformed text');
     return res.status(200).json({ transformedText });
   } catch (error) {
     console.error('API Error:', error);
