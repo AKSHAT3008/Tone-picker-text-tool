@@ -1,9 +1,4 @@
 {
   "buildCommand": "cd tone-picker-text-tool && npm install && npm run build",
-  "outputDirectory": "tone-picker-text-tool/build",
-  "functions": {
-    "api/*.js": {
-      "runtime": "nodejs18.x"
-    }
-  }
+  "outputDirectory": "tone-picker-text-tool/build"
 }
