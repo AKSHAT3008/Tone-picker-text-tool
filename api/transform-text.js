@@ -1,4 +1,4 @@
-const axios = require('axios');
+import axios from 'axios';
 
 const cache = new Map();
 
@@ -17,6 +17,9 @@ function getToneDescription(tone) {
 }
 
 export default async function handler(req, res) {
+  console.log('API function called');
+  console.log('Method:', req.method);
+  console.log('Has API key:', !!process.env.MISTRAL_API_KEY);
   // Add CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -40,8 +43,8 @@ export default async function handler(req, res) {
     }
     
     if (!process.env.MISTRAL_API_KEY) {
-      console.log('Error: MISTRAL_API_KEY not found');
-      return res.status(500).json({ error: 'API key not configured' });
+      console.log('Error: MISTRAL_API_KEY not found in environment');
+      return res.status(500).json({ error: 'Server configuration error: API key missing' });
     }
 
     const cacheKey = `${text.substring(0, 100)}_${tone.x}_${tone.y}`;

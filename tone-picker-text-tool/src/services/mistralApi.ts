@@ -73,24 +73,8 @@ export class MistralApiService {
       
       return transformedText;
     } catch (error: any) {
-      console.error('Backend API Error:', error);
-      console.error('Error details:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status
-      });
-      
-      if (error.response) {
-        const errorData = error.response.data;
-        const errorMessage = typeof errorData === 'string' ? errorData : 
-                           errorData?.error || errorData?.message || 
-                           `API error: ${error.response.status}`;
-        throw new Error(String(errorMessage));
-      } else if (error.request) {
-        throw new Error('Network error: Unable to connect to server');
-      } else {
-        throw new Error(String(error.message) || 'An unexpected error occurred');
-      }
+      console.error('API Error:', error);
+      throw new Error('Failed to transform text. Please try again.');
     }
   }
 
