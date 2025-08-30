@@ -43,7 +43,7 @@ export default async function handler(req, res) {
       {
         model: 'mistral-small-latest',
         messages: [{ role: 'user', content: `Rewrite this text with ${getToneDescription(tone)} tone: "${text}"` }],
-        max_tokens: 1000,
+        max_tokens: 500,
         temperature: 0.7
       },
       {
@@ -51,17 +51,31 @@ export default async function handler(req, res) {
           'Authorization': `Bearer ${process.env.MISTRAL_API_KEY}`,
           'Content-Type': 'application/json'
         },
-        timeout: 30000
+        timeout: 15000
       }
     );
+    
+    if (!response.data?.choices?.[0]?.message?.content) {
+      throw new Error('Invalid response from Mistral AI');
+    }
 
     const transformedText = response.data.choices[0].message.content.trim();
     cache.set(cacheKey, transformedText);
     
     return res.status(200).json({ transformedText });
   } catch (error) {
+    if (error.response?.status === 401) {
+      return res.status(500).json({ error: 'Invalid API key' });
+    }
+    if (error.response?.status === 429) {
+      return res.status(500).json({ error: 'Rate limit exceeded' });
+    }
+    if (error.code === 'ECONNABORTED') {
+      return res.status(500).json({ error: 'Request timeout' });
+    }
+    
     return res.status(500).json({ 
-      error: 'Failed to transform text'
+      error: 'Service temporarily unavailable'
     });
   }
 }
