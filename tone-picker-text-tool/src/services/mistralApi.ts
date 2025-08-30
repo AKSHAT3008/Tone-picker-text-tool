@@ -74,10 +74,8 @@ export class MistralApiService {
       return transformedText;
     } catch (error: any) {
       console.error('API Error:', error);
-      console.error('Response data:', error.response?.data);
       
-      const errorMsg = error.response?.data?.details || 
-                      error.response?.data?.error || 
+      const errorMsg = error.response?.data?.error || 
                       'Failed to transform text. Please try again.';
       throw new Error(errorMsg);
     }

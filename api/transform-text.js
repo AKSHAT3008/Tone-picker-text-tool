@@ -1,7 +1,3 @@
-import axios from 'axios';
-
-const cache = new Map();
-
 function getToneDescription(tone) {
   const { x, y } = tone;
   if (x === -1 && y === -1) return 'professional and direct';
@@ -17,65 +13,70 @@ function getToneDescription(tone) {
 }
 
 export default async function handler(req, res) {
+  // 1. Only allow POST requests
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    res.setHeader('Allow', 'POST');
+    return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
   try {
+    // 2. Get the text and tone object from the front-end's request
     const { text, tone } = req.body;
-    
-    if (!text?.trim()) {
-      return res.status(400).json({ error: 'Text is required' });
+
+    if (!text || typeof tone?.x !== 'number' || typeof tone?.y !== 'number') {
+      return res.status(400).json({ error: 'Missing or invalid text or tone in request body' });
     }
     
     if (!process.env.MISTRAL_API_KEY) {
+      console.error('API key not configured on server.');
       return res.status(500).json({ error: 'API key not configured' });
     }
 
-    const cacheKey = `${text.substring(0, 100)}_${tone.x}_${tone.y}`;
-    
-    if (cache.has(cacheKey)) {
-      return res.status(200).json({ transformedText: cache.get(cacheKey) });
-    }
+    const toneDescription = getToneDescription(tone);
 
-    const response = await axios.post(
-      'https://api.mistral.ai/v1/chat/completions',
-      {
-        model: 'mistral-small-latest',
-        messages: [{ role: 'user', content: `Rewrite this text with ${getToneDescription(tone)} tone: "${text}"` }],
-        max_tokens: 500,
-        temperature: 0.7
+    // 3. Construct a more robust prompt for Mistral
+    const prompt = `As an expert editor, rewrite the following text to make it ${toneDescription}. Maintain the core message. Output only the rewritten text, without any introductory phrases, explanations, or markdown formatting.
+
+TEXT:
+"""
+${text}
+"""`;
+
+    // 4. Call the Mistral API from the backend using the built-in fetch API
+    const mistralResponse = await fetch('https://api.mistral.ai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.MISTRAL_API_KEY}`,
+        'Accept': 'application/json',
       },
-      {
-        headers: {
-          'Authorization': `Bearer ${process.env.MISTRAL_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        timeout: 15000
-      }
-    );
-    
-    if (!response.data?.choices?.[0]?.message?.content) {
-      throw new Error('Invalid response from Mistral AI');
+      body: JSON.stringify({
+        model: 'mistral-small-latest',
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+
+    // 5. Handle non-successful responses from Mistral
+    if (!mistralResponse.ok) {
+        const errorData = await mistralResponse.json();
+        console.error('Mistral API Error:', errorData);
+        // Forward a generic but informative error to the client
+        return res.status(mistralResponse.status).json({ error: 'Failed to get a response from the AI service.'});
     }
 
-    const transformedText = response.data.choices[0].message.content.trim();
-    cache.set(cacheKey, transformedText);
+    const data = await mistralResponse.json();
+    const transformedText = data.choices[0]?.message?.content?.trim();
     
-    return res.status(200).json({ transformedText });
+    if (!transformedText) {
+        throw new Error('Invalid or empty response from Mistral AI');
+    }
+
+    // 6. Send the transformed text back to the front-end
+    res.status(200).json({ transformedText });
+
   } catch (error) {
-    if (error.response?.status === 401) {
-      return res.status(500).json({ error: 'Invalid API key' });
-    }
-    if (error.response?.status === 429) {
-      return res.status(500).json({ error: 'Rate limit exceeded' });
-    }
-    if (error.code === 'ECONNABORTED') {
-      return res.status(500).json({ error: 'Request timeout' });
-    }
-    
-    return res.status(500).json({ 
-      error: 'Service temporarily unavailable'
-    });
+    // This will catch any other errors and log them for debugging
+    console.error('Error in /api/transform-text:', error.message);
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 }
