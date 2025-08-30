@@ -49,13 +49,24 @@ export class MistralApiService {
     }
 
     try {
+      console.log('Making API request to:', BACKEND_API_URL);
       const response = await axios.post(
         BACKEND_API_URL,
         { text, tone },
-        { timeout: 30000 }
+        { 
+          timeout: 30000,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
       );
 
+      console.log('API response:', response.data);
       const transformedText = (response.data as { transformedText: string }).transformedText;
+      
+      if (!transformedText) {
+        throw new Error('No transformed text received from API');
+      }
       
       // Cache the result
       cache.set(cacheKey, transformedText);
@@ -63,10 +74,15 @@ export class MistralApiService {
       return transformedText;
     } catch (error: any) {
       console.error('Backend API Error:', error);
+      console.error('Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
       
       if (error.response) {
         const apiError: ApiError = {
-          message: error.response.data?.error || 'API request failed',
+          message: error.response.data?.error || `API error: ${error.response.status}`,
           status: error.response.status
         };
         throw apiError;

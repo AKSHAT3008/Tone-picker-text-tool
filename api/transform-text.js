@@ -17,11 +17,21 @@ function getToneDescription(tone) {
 }
 
 export default async function handler(req, res) {
+  // Add CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
+    console.log('API function called with:', req.body);
     const { text, tone } = req.body;
     
     if (!text?.trim()) {
@@ -57,6 +67,14 @@ export default async function handler(req, res) {
     return res.status(200).json({ transformedText });
   } catch (error) {
     console.error('API Error:', error);
-    return res.status(500).json({ error: 'Failed to transform text' });
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      response: error.response?.data
+    });
+    return res.status(500).json({ 
+      error: 'Failed to transform text',
+      details: error.message 
+    });
   }
 }
