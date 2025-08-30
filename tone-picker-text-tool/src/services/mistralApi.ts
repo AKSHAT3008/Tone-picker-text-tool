@@ -2,7 +2,7 @@ import axios from 'axios';
 import { ApiError, TonePosition } from '../types';
 
 const BACKEND_API_URL = process.env.NODE_ENV === 'production' 
-  ? `${process.env.REACT_APP_API_URL}/api/transform-text`
+  ? '/api/transform-text'
   : 'http://localhost:3001/api/transform-text';
 
 // Simple in-memory cache
