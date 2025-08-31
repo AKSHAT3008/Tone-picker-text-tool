@@ -1,36 +1,67 @@
 # Tone Picker Text Tool
 
-Transform text tone using AI-powered adjustments. Built with React, TypeScript, Express.js backend, and Mistral AI API.
+Transform text tone using AI-powered adjustments. Built with React, TypeScript, and Mistral AI API. Deployed as a full-stack application on Vercel.
 
-## Quick Start
+## 🚀 Live Demo
+
+**[View Live Application](https://tone-picker-text-tool-psi.vercel.app/)**
+
+## ✨ Features
+
+### Core Functionality
+- **Text Editor**: Input text with live character/word count
+- **3x3 Tone Matrix**: Adjust tone from formal/casual and professional/friendly
+- **Undo/Redo**: Complete revision history navigation
+- **Reset**: Return to original text
+- **Auto-save**: Persistent storage across sessions
+
+### Technical Implementation
+- **AI Integration**: Powered by Mistral AI's small model
+- **Serverless Backend**: Vercel serverless functions for API security
+- **Error Handling**: Graceful failures with user-friendly messages
+- **TypeScript**: Full type safety throughout
+- **Responsive Design**: Works on all devices
+- **Accessibility**: WCAG 2.1 AA compliant with screen reader support
+
+## 🎯 Usage
+
+1. **Enter text** in the editor on the left
+2. **Click any position** on the 3x3 tone grid on the right
+3. **AI transforms** your text to match the selected tone
+4. **Navigate history** with Undo/Redo buttons
+5. **Reset** returns to original text
+
+### Tone Grid Layout
+```
+Professional & Direct  |  Professional & Formal  |  Formal & Structured
+Balanced Pro/Friendly  |  Neutral & Balanced     |  Balanced Form/Casual
+Friendly & Approachable|  Balanced Friend/Casual |  Casual & Relaxed
+```
+
+## 🛠️ Local Development
 
 ### Prerequisites
 - Node.js 14+
 - Mistral AI API key
 
 ### Setup
-1. **Clone and install**
 ```bash
-git clone <repository-url>
-cd tone-picker-text-tool
+# Clone repository
+git clone https://github.com/AKSHAT3008/Tone-picker-text-tool.git
+cd Tone-picker-text-tool
 
-# Install frontend
+# Install frontend dependencies
 cd tone-picker-text-tool
 npm install
 
-# Install backend
+# Install backend dependencies  
 cd ../backend
 npm install
-```
-
-2. **Configure API key**
-```bash
-cd backend
 cp .env.example .env
-# Edit .env and add: MISTRAL_API_KEY=your_key_here
+# Edit .env and add your MISTRAL_API_KEY
 ```
 
-3. **Run the application**
+### Run Locally
 ```bash
 # Terminal 1: Start backend
 cd backend
@@ -41,43 +72,10 @@ cd tone-picker-text-tool
 npm start
 ```
 
-4. **Access the app**
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:3001
 
-## Features
-
-### Core Functionality
-- **Text Editor**: Input text with live character/word count
-- **3x3 Tone Matrix**: Adjust tone from formal/casual and professional/friendly
-- **Undo/Redo**: Complete revision history navigation
-- **Reset**: Return to original text
-- **Auto-save**: Persistent storage across sessions
-
-### Technical Implementation
-- **Secure Backend**: API key protection via Express.js server
-- **Smart Caching**: Dual-layer caching (client + server)
-- **Error Handling**: Graceful failures with retry options
-- **TypeScript**: Full type safety
-- **Responsive Design**: Works on all devices
-- **Accessibility**: WCAG 2.1 AA compliant
-
-## Usage
-
-1. Enter text in the left editor
-2. Click any position on the 3x3 tone grid
-3. AI transforms your text to match the selected tone
-4. Use Undo/Redo to navigate changes
-5. Reset returns to original text
-
-### Tone Grid Layout
-```
-Formal Professional  |  Neutral Professional  |  Casual Professional
-Formal Neutral       |  Neutral Neutral       |  Casual Neutral  
-Formal Friendly      |  Neutral Friendly      |  Casual Friendly
-```
-
-## Architecture
+## 🏗️ Architecture
 
 ### Project Structure
 ```
@@ -85,50 +83,79 @@ Formal Friendly      |  Neutral Friendly      |  Casual Friendly
 │   ├── src/components/       # UI components
 │   ├── src/services/         # API integration
 │   └── src/types/           # TypeScript definitions
-└── backend/                 # Express.js API
-    ├── server.js           # Main server
-    ├── .env               # API key (create from .env.example)
-    └── package.json       # Dependencies
+├── backend/                 # Express.js server (local dev)
+├── api/                     # Vercel serverless functions
+└── vercel.json             # Deployment configuration
 ```
 
-### API Flow
-1. Frontend → Backend API (`/api/transform-text`)
-2. Backend → Mistral AI API (with caching)
-3. Response → Frontend with transformed text
+### Technology Stack
+- **Frontend**: React 19, TypeScript, CSS3
+- **Backend**: Vercel Serverless Functions
+- **AI**: Mistral AI API (mistral-small-latest)
+- **Deployment**: Vercel
+- **Storage**: Browser localStorage
 
-## Development
+## 🚀 Deployment
 
-### Available Scripts
-**Frontend:**
-- `npm start` - Development server
-- `npm build` - Production build
-- `npm test` - Run tests
-
-**Backend:**
-- `npm start` - Start server
-- `npm run dev` - Development with auto-reload
+### Vercel Deployment
+1. **Fork/Clone** this repository
+2. **Connect to Vercel**: Import project from GitHub
+3. **Add Environment Variable**: 
+   - Key: `MISTRAL_API_KEY`
+   - Value: Your Mistral AI API key
+4. **Deploy**: Automatic deployment on git push
 
 ### Environment Variables
 ```bash
-# backend/.env
-MISTRAL_API_KEY=your_mistral_api_key
-PORT=3001
+# Required for production
+MISTRAL_API_KEY=your_mistral_api_key_here
 ```
 
-## Troubleshooting
+## 🧪 Testing
+
+Comprehensive test cases available in `TEST_CASES.md`:
+- Basic functionality (9 tone transformations)
+- Edge cases (special characters, long text)
+- Error handling (network issues, API failures)
+- Accessibility (keyboard navigation, screen readers)
+- Performance (large text, memory usage)
+
+## 🎨 Accessibility Features
+
+- **Screen Reader Support**: Full NVDA/JAWS/VoiceOver compatibility
+- **Keyboard Navigation**: Complete functionality without mouse
+- **ARIA Labels**: Comprehensive semantic markup
+- **Focus Management**: High-contrast visual indicators
+- **Live Announcements**: Real-time feedback for tone changes
+
+## 🔧 API Reference
+
+### Transform Text Endpoint
+```
+POST /api/transform-text
+Content-Type: application/json
+
+{
+  "text": "Your text here",
+  "tone": { "x": 0, "y": 0 }
+}
+
+Response:
+{
+  "transformedText": "Transformed text here"
+}
+```
+
+### Tone Coordinates
+- **x-axis**: -1 (Professional) → 0 (Neutral) → 1 (Casual)
+- **y-axis**: -1 (Direct) → 0 (Balanced) → 1 (Friendly)
+
+## 🐛 Troubleshooting
 
 ### Common Issues
-1. **"Cannot connect to server"**
-   - Ensure backend is running on port 3001
-   - Check .env file has valid API key
-
-2. **"API key invalid"**
-   - Verify Mistral AI API key in backend/.env
-   - Check API key permissions
-
-3. **Port conflicts**
-   - Frontend: Change port with `PORT=3001 npm start`
-   - Backend: Update PORT in .env file
+1. **"Failed to transform text"**: Check internet connection and API key
+2. **Blank page**: Check browser console for JavaScript errors
+3. **Slow responses**: Large text may take longer to process
 
 ### Debug Mode
 ```javascript
@@ -136,35 +163,32 @@ PORT=3001
 localStorage.setItem('debug', 'true');
 ```
 
-## Accessibility
+## 📝 License
 
-- **Screen Reader**: Full NVDA/JAWS/VoiceOver support
-- **Keyboard Navigation**: Tab through all controls
-- **ARIA Labels**: Comprehensive semantic markup
-- **Focus Indicators**: High-contrast visual feedback
+MIT License - see LICENSE file for details
 
-Test with:
-- Tab navigation only
-- Screen reader software
-- Browser accessibility tools (F12 → Accessibility)
+## 🤝 Contributing
 
-## Technical Details
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
 
-### Security
-- API key stored securely in backend environment
-- CORS configured for frontend-backend communication
-- No sensitive data exposed to client
+## 📊 Performance
 
-### Performance
-- Server-side response caching
-- Client-side request deduplication
-- Optimized React rendering with hooks
+- **Response Time**: < 3 seconds for typical text
+- **Supported Text Length**: Up to 5000 characters
+- **Browser Support**: Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
+- **Mobile Support**: iOS 14+, Android 8+
 
-### Browser Support
-- Chrome, Firefox, Safari, Edge (latest versions)
-- Mobile responsive design
-- Progressive enhancement
+## 🔒 Security
 
-## License
+- API key stored securely in serverless environment
+- Input sanitization prevents XSS attacks
+- No sensitive data stored in browser
+- HTTPS encryption for all communications
 
-MIT License
+---
+
+**Built with ❤️ using React, TypeScript, and Mistral AI**
